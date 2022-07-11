@@ -6,6 +6,7 @@ import argparse
 
 from core import rating as ra
 import menu_cli
+import menu_gui
 
 
 def main() -> None:
@@ -20,7 +21,7 @@ def main() -> None:
     rating_matrix = ra.get_matrix(matrix)
     
     if args.type == "gui":
-        pass
+        menu_gui.main(books, readers, booksread, rating_matrix)
     else:
         menu_cli.main_menu(books, readers, booksread, rating_matrix)
         

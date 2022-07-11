@@ -10,63 +10,26 @@ import re as regex
 from core import readers as re
 
 
-def grade_book(books: str, readers: str, booksread: str, rating_matrix: list[list[int]], reader_username: str = None) -> None:
+def grade_book(rating_matrix: list[list[int]], info: list[str]) -> None:
     """Allows a user to grade a book he has read."""
     
-    with open(books, encoding="utf-8") as books_file, open(readers, encoding="utf-8") as readers_file, open(booksread, encoding="utf-8") as booksread_file:
-        books_name = {name.strip().lower(): str(index) for index, name in enumerate(books_file.readlines())}
-        readers_name = {name.split(",")[0].lower(): index for index, name in enumerate(readers_file.readlines())}
-        booksread_file_content = booksread_file.read().lower()
-
-        if not reader_username:
-            while True:
-                reader_username = input("Enter the reader's username: ").lower()
-
-                if reader_username not in list(readers_name.keys()):
-                    print("Reader not in the database.")
-                else:
-                    break
-
-        while True:
-            book = input("Enter the name of the book: ").lower()
-
-            if book not in list(books_name.keys()):
-                print("Book not in the database.")
-            else:
-                book = books_name[book]
-                pattern = regex.compile(f"{reader_username}.+", regex.MULTILINE | regex.IGNORECASE)
-
-                if book not in pattern.search(booksread_file_content)[0]:
-                    print("You did not read that book.")
-                else:
-                    break
-
-    while True:
-        score = int(input("Enter a score between 1 and 5: "))
-
-        if 1 <= score <= 5:
-            break
-        else:
-            print("Incorrect number.")
-            
-    
+    reader_username, book, score = info
 
     rating_matrix[readers_name[reader_username]][int(book)] = score
 
     return rating_matrix
                 
 
-def recommend_book(books: str, booksread: str, rating_matrix: list[list[int]]) -> str:
+def recommend_book(books: str, booksread: str, rating_matrix: list[list[int]], user_1: str) -> str:
     """Recommend a book to a reader."""
     
     with open(booksread, encoding="utf-8") as booksread_file:
         booksread_file_content = booksread_file.readlines()
     
     similarity_matrix = similarities_matrix(rating_matrix)
-    user_1 = input("Enter the reader's username: ").lower()
     
     for index, line in enumerate(booksread_file_content):
-        if user_1 in line.lower():
+        if user_1.lower() in line.lower():
             similar = most_similar(similarity_matrix[index])
             user_1 = line.strip().split(",")[1:]
             break
@@ -79,9 +42,7 @@ def recommend_book(books: str, booksread: str, rating_matrix: list[list[int]]) -
     books_recommended = list(set(user_1).symmetric_difference(set(user_2)))
     books_recommended = re.get_books_name(books, books_recommended)
     
-    print("Book(s) recommended:")
-    for book in books_recommended:
-        print(book)
+    return "\n".join(books_recommended)
         
         
 """ ===== HELPERS FUNCTIONS ===== """
@@ -115,7 +76,7 @@ def add_row(rating_matrix: list[list[int]]) -> None:
 def delete_row(rating_matrix: list[list[int]], user_index: int) -> None:
     """Delete a row after deleting a reader in the deposit file."""
     
-    del rating_matrix[user_index - 1]
+    del rating_matrix[user_index]
     
     
 def column_handling(rating_matrix: list[list[int]], book_index: int, delete: bool = False) -> None:
