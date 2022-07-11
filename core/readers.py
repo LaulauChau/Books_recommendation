@@ -49,7 +49,7 @@ def add_reader(books: str, booksread: str, rating_matrix: list[list[str]]) -> No
         readers_file.write(",".join(reader_information) + "\n")
         booksread_file.write(",".join(reader_booksread) + "\n")
         
-    rating.add_row(books, rating_matrix)
+    rating.add_row(rating_matrix)
     
     
 def display_reader(books: str, readers: str, booksread: str) -> None:
@@ -188,7 +188,7 @@ def get_booksread(books: str) -> list[str]:
     return books_read
 
 
-def get_books_name(books_read: list[str], books: str) -> list[str]:
+def get_books_name(books: str, books_read: list[str]) -> list[str]:
     """Get the names of the books read by the reader."""
 
     with open(books, encoding="utf-8") as books_file:
