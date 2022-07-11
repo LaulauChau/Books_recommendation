@@ -30,6 +30,7 @@ def add_books(books: str, rating_matrix: list[list[int]]) -> None:
                 print("Book already in the deposit.")
             else:
                 books_file.write(book_name + "\n")
+                break
 
 
 def book_handling(books: str, booksread: str, rating_matrix: list[list[int]], delete: bool = False) -> None:
@@ -40,6 +41,8 @@ def book_handling(books: str, booksread: str, rating_matrix: list[list[int]], de
     
     with open(books, encoding="utf-8") as books_file:
         books_name = books_file.readlines()
+        
+    display_books(books)
         
     while True:
         book_index = int(input("Enter the book number: ")) - 1

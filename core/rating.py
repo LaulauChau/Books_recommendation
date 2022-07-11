@@ -5,9 +5,9 @@
 
 
 import math
-import re
+import re as regex
 
-from core import readers
+from core import readers as re
 
 
 def grade_book(books: str, readers: str, booksread: str, rating_matrix: list[list[int]], reader_username: str = None) -> None:
@@ -17,39 +17,42 @@ def grade_book(books: str, readers: str, booksread: str, rating_matrix: list[lis
         books_name = {name.strip().lower(): str(index) for index, name in enumerate(books_file.readlines())}
         readers_name = {name.split(",")[0].lower(): index for index, name in enumerate(readers_file.readlines())}
         booksread_file_content = booksread_file.read().lower()
-        
+
         if not reader_username:
             while True:
-                reader_username = input("Enter the reader's username: ")
-                
+                reader_username = input("Enter the reader's username: ").lower()
+
                 if reader_username not in list(readers_name.keys()):
                     print("Reader not in the database.")
                 else:
                     break
-                
+
         while True:
             book = input("Enter the name of the book: ").lower()
-            
+
             if book not in list(books_name.keys()):
                 print("Book not in the database.")
             else:
                 book = books_name[book]
-                
-                if book not in re.search(f"{reader_username}.+", booksread_file_content)[0]:
-                    print("You have not read that book.")
+                pattern = regex.compile(f"{reader_username}.+", regex.MULTILINE | regex.IGNORECASE)
+
+                if book not in pattern.search(booksread_file_content)[0]:
+                    print("You did not read that book.")
                 else:
                     break
-                
+
     while True:
         score = int(input("Enter a score between 1 and 5: "))
-            
+
         if 1 <= score <= 5:
             break
         else:
             print("Incorrect number.")
             
-    rating_matrix[readers_name[reader_username]][int(book)] = score
     
+
+    rating_matrix[readers_name[reader_username]][int(book)] = score
+
     return rating_matrix
                 
 
@@ -63,20 +66,21 @@ def recommend_book(books: str, booksread: str, rating_matrix: list[list[int]]) -
     user_1 = input("Enter the reader's username: ").lower()
     
     for index, line in enumerate(booksread_file_content):
-        if user_1 in line:
+        if user_1 in line.lower():
             similar = most_similar(similarity_matrix[index])
             user_1 = line.strip().split(",")[1:]
-        
+            break
+
     user_2 = booksread_file_content[similar].strip().split(",")[1:]
     
     user_1 = [int(x) for x in user_1]
     user_2 = [int(x) for x in user_2]
     
-    books_recommended = set(user_2) - set(user_1)
-    books_recommend = readers.get_books_name(books, books_recommended)
+    books_recommended = list(set(user_1).symmetric_difference(set(user_2)))
+    books_recommended = re.get_books_name(books, books_recommended)
     
     print("Book(s) recommended:")
-    for book in books_recommend:
+    for book in books_recommended:
         print(book)
         
         
@@ -161,4 +165,15 @@ def most_similar(row: list[float]) -> int:
         if j != 1 and j > maximum:
             maximum, index = j, i
 
-    return 
+    return index
+
+
+def get_matrix(matrix: str) -> None:
+    """Extract a matrix from its file."""
+    
+    with open(matrix) as matrix_file:
+        rating_matrix = [
+            [int(rating) for rating in row.split()] for row in matrix_file.readlines()
+        ]
+        
+    return rating_matrix
